@@ -5,3 +5,6 @@ export const fetchWeatherData = async (city) => {
     if (data.cod !== 200) throw new Error(data.message);
     return data;
 };
+
+// 天气图标
+// https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/01d.png
