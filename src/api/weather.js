@@ -4,7 +4,10 @@ export const fetchWeatherData = async (city, unit) => {
     `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=${unit}`
   );
   const data = await response.json();
-  if (data.cod !== 200) throw new Error(data.message);
+  if (data.cod !== 200){
+    alert(data.message)
+    throw new Error(data.message);
+  } 
   return data;
 };
 
@@ -15,7 +18,10 @@ export const fetchForecastWeatherData = async (city, unit) => {
   );
   const data = await response.json();
   
-  if (data.cod !== '200') throw new Error(data.message);
+  if (data.cod !== "200"){
+    alert(data.message)
+    throw new Error(data.message);
+  } 
   try {
     const weeklyForecast = [];
 
