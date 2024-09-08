@@ -1,5 +1,5 @@
 // 判断风向
-export default function determineWindDirection(degrees) {
+export function determineWindDirection(degrees) {
     let direction;
     if (degrees >= 0 && degrees < 22.5) {
         direction = 'N';
@@ -38,7 +38,7 @@ export default function determineWindDirection(degrees) {
 }
 
 // 判断空气湿度
-export default function determineHumidityStatus(humidity) {
+export function determineHumidityStatus(humidity) {
     let status;
     if (humidity < 30) {
         status = 'Low';
@@ -53,7 +53,7 @@ export default function determineHumidityStatus(humidity) {
 }
 
 // 判断能见度
-export default function determineVisibilityStatus(visibility) {
+export function determineVisibilityStatus(visibility) {
     let status;
     if (visibility < 2) {
         status = 'Low';
@@ -68,7 +68,7 @@ export default function determineVisibilityStatus(visibility) {
 }
 
 // 判断空气质量
-export default function determineAirQuality(aqi) {
+export function determineAirQuality(aqi) {
     let quality;
     if (aqi <= 50) {
         quality = 'Good';
@@ -84,4 +84,23 @@ export default function determineAirQuality(aqi) {
         quality = 'Invalid';
     }
     return quality;
+}
+
+// 判断云量
+export function describeCloudCover(cloudPercentage) {
+    let description = '';
+  
+    if (cloudPercentage >= 90) {
+      description = 'Mostly Cloudy';
+    } else if (cloudPercentage >= 75) {
+      description = 'Partly Cloudy';
+    } else if (cloudPercentage >= 50) {
+      description = 'Scattered Clouds';
+    } else if (cloudPercentage >= 25) {
+      description = 'Few Clouds';
+    } else {
+      description = 'Clear Sky';
+    }
+  
+    return description;
 }

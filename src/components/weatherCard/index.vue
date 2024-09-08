@@ -10,11 +10,11 @@
         >
       </div>
       <div class="temp-button">
-        <div class="temp" :class="{ active: currentTempBtnIndex === 0 }">
-          <a href="javascript:;">℃</a>
+        <div class="temp" :class="{ active: currentTempBtnIndex === 0 }" >
+          <a href="javascript:;" @click="handleTempBtnClick(0)">℃</a>
         </div>
         <div class="temp" :class="{ active: currentTempBtnIndex === 1 }">
-          <a href="javascript:;">℉</a>
+          <a href="javascript:;"  @click="handleTempBtnClick(1)">℉</a>
         </div>
         <div class="avatar">
           <img src="../../assets/avatar.jpg" alt="" />
@@ -22,18 +22,18 @@
       </div>
     </div>
     <div class="weather-card">
-      <div class="card" v-for="item in 7">
-        <div class="time">Sun</div>
+      <div class="card" v-for="item in weeklyForecastData">
+        <div class="time">{{ item.weekday }}</div>
         <div class="weather-icon">
-          <img src="../../assets/10d.png" alt="" />
+          <img :src="`https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/widgets/${item.icon}.png`" alt="" />
         </div>
         <div class="max-min">
-          <span class="max">15℃</span>
-          <span class="min">-3℃</span>
+          <span class="max">{{item.maxTemp}}<span v-if="unitIndex === 0">℃</span><span v-else>℉</span></span>
+          <span class="min">{{item.minTemp}}<span v-if="unitIndex === 0">℃</span><span v-else>℉</span></span>
         </div>
       </div>
     </div>
-    <div class="highlights">
+    <div class="highlights" v-if="weatherData.dt">
       <div class="title">
         <h1>Today's Highlights</h1>
       </div>
@@ -54,10 +54,10 @@
               <div class="item-box">
                 <div class="title">Wind Status</div>
                 <div class="message">
-                  <div class="wind-speed"><span class="speed">7.70</span> km/h</div>
+                  <div class="wind-speed"><span class="speed">{{weatherData.wind.speed}}</span> km/h</div>
                   <div class="wind-deg">
                     <img src="../../assets/wind.png" alt="">
-                    <span class="deg">WSW</span>
+                    <span class="deg">{{ determineWindDirection(weatherData.wind.deg) }}</span>
                   </div>
                 </div>
               </div>
@@ -71,14 +71,14 @@
                   <div class="rise-down">
                     <img src="../../assets/rise.png" alt="">
                     <div class="time">
-                      <span style="font-size: 16px;margin-bottom: 5px;">6:35 AM</span>
+                      <span style="font-size: 16px;margin-bottom: 5px;">{{formatTime12h(weatherData.sys.sunrise)}}</span>
                       <span style="font-size: 12px;color: #ccc;">-1m 46s</span>
                     </div>
                   </div>
                   <div class="rise-down">
                     <img src="../../assets/down.png" alt="">
                     <div class="time">
-                      <span style="font-size: 16px;margin-bottom: 5px;">5:42 PM</span>
+                      <span style="font-size: 16px;margin-bottom: 5px;">{{formatTime12h(weatherData.sys.sunset)}}</span>
                       <span style="font-size: 12px;color: #ccc;">+2m 22s</span>
                     </div>
                   </div>
@@ -94,10 +94,10 @@
                 <div class="title">Humidity</div>
                 <div class="message">
                   <div class="content">
-                    <span class="data">12</span><span style="position: absolute;">%</span>
+                    <span class="data">{{ weatherData.main.humidity }}</span><span style="position: absolute;">%</span>
                   </div>
                   <div class="rate">
-                    Normal
+                    {{determineHumidityStatus(weatherData.main.humidity)}}
                   </div>
                 </div>
               </div>
@@ -108,8 +108,8 @@
               <div class="item-box">
                 <div class="title">Visibility</div>
                 <div class="message">
-                  <div class="content"><span class="data">5.2</span> km</div>
-                  <div class="rate">Average</div>
+                  <div class="content"><span class="data">{{(weatherData.visibility/1000).toFixed(1)}}</span> km</div>
+                  <div class="rate">{{determineVisibilityStatus(weatherData.visibility/1000)}}</div>
                 </div>
               </div>
             </div>
@@ -132,9 +132,20 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref,defineProps,defineEmits } from "vue";
+import {determineWindDirection,determineHumidityStatus,determineVisibilityStatus} from "@/utils/weather"
+import {formatTime12h} from "@/utils/date"
+
+const props = defineProps(['weatherData','weeklyForecastData','unitIndex'])
+const emit = defineEmits(['unitBtnChange'])
+
 let currentTabIndex = ref(1);
 let currentTempBtnIndex = ref(0);
+
+const handleTempBtnClick = (index) => {
+  currentTempBtnIndex.value = index
+  emit('unitBtnChange',currentTempBtnIndex.value)
+}
 </script>
 
 <style lang="scss" scoped>

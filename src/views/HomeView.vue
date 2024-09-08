@@ -5,39 +5,60 @@
         <el-col :xs="16" :sm="12" :md="8" :lg="6" :xl="8">
           <div class="grid-content left">
             <div class="search">
-              <Search></Search>
+              <Search @clickSearch="handleClickSearch"></Search>
             </div>
-            <div class="weather-img">
-              <img src="../assets/10d.png" alt="" />
+            <div class="weather-img" v-if="currentWeatherData.weather">
+              <img
+                :src="`https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/widgets/${currentWeatherData.weather[0].icon}.png`"
+                alt=""
+              />
             </div>
             <div class="daily-message">
               <div class="temp">
-                <span class="temperature">12</span>
-                <span class="degree">℃</span>
+                <span class="temperature">{{
+                  currentWeatherData.main?.temp
+                }}</span>
+                <span class="degree" v-if="unitIndex === 0">℃</span>
+                <span class="degree" v-else>℉</span>
               </div>
               <div class="time">
-                <span class="week">Monday, </span>
-                <span class="time-now">16:00</span>
+                <span class="week"
+                  >{{
+                    formatDateTimeWithWeek(currentWeatherData.dt).split(",")[0]
+                  }},
+                </span>
+                <span class="time-now">{{
+                  formatDateTimeWithWeek(currentWeatherData.dt).split(",")[1]
+                }}</span>
               </div>
             </div>
             <div class="weather-message">
               <div class="weather-flex">
-                <img src="../assets/10d.png" alt="" />
-                Mostly Cloudy
+                <img src="../assets/cloud.png" alt="" />
+                {{ describeCloudCover(currentWeatherData.clouds?.all) }}
               </div>
               <div class="weather-flex">
-                <img src="../assets/10d.png" alt="" />
+                <img src="../assets/rain.png" alt="" />
                 Rain - 30%
               </div>
             </div>
             <div class="city">
-              <span class="name">New York, NY, USA</span>
+              <span class="name"
+                >{{ currentWeatherData.name }},{{
+                  currentWeatherData.sys?.country
+                }}</span
+              >
             </div>
           </div>
         </el-col>
         <el-col :xs="8" :sm="12" :md="16" :lg="18" :xl="16">
           <div class="grid-content right">
-            <weatherCard></weatherCard>
+            <weatherCard
+              :weatherData="currentWeatherData"
+              :weeklyForecastData="weeklyForecast"
+              :unitIndex="unitIndex"
+              @unitBtnChange="handleClickUnitBtn"
+            ></weatherCard>
           </div>
         </el-col>
       </el-row>
@@ -45,7 +66,71 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref, onMounted } from "vue";
+import { fetchWeatherData, fetchForecastWeatherData } from "@/api/weather";
+import { describeCloudCover } from "@/utils/weather";
+import { formatDateTimeWithWeek } from "@/utils/date";
+
+let currentWeatherData = ref({});
+let weeklyForecast = ref([]);
+let recentSearches = ref(JSON.parse(localStorage.getItem("search")) || []);
+let recentCity = recentSearches.value[recentSearches.value.length - 1];
+let unitIndex = ref(0)
+
+const handleClickSearch = (city) => {;
+  if(unitIndex.value === 0){
+    getTodayWeatherData(city,'metric')
+    getWeekWeatherData(city,'metric')
+  }else if(unitIndex.value === 1){
+    getTodayWeatherData(city,'imperial')
+    getWeekWeatherData(city,'imperial')
+  }else{
+    ElMessage.error('error')
+    return
+  }
+};
+
+const handleClickUnitBtn = (btnIndex) => {
+  unitIndex.value = btnIndex
+  if(btnIndex === 0){
+    getTodayWeatherData(recentCity,'metric')
+    getWeekWeatherData(recentCity,'metric')
+  }else if(btnIndex === 1){
+    getTodayWeatherData(recentCity,'imperial')
+    getWeekWeatherData(recentCity,'imperial')
+  }else{
+    ElMessage.error('error')
+    return
+  }
+}
+
+const getTodayWeatherData = async (city, unit = "metric") => {
+  if (!recentSearches.value) {
+    currentWeatherData.value = await fetchWeatherData("Guangdong", unit);
+  } else {
+    currentWeatherData.value = await fetchWeatherData(city, unit);
+  }
+};
+
+const getWeekWeatherData = async (city, unit = "metric") => {
+  if (!recentSearches.value) {
+    weeklyForecast.value = await fetchForecastWeatherData("Guangdong", unit);
+  } else {
+    weeklyForecast.value = await fetchForecastWeatherData(city, unit);
+  }
+};
+
+onMounted(() => {
+  if (recentCity) {
+    getTodayWeatherData(recentCity);
+    getWeekWeatherData(recentCity);
+  } else {
+    getTodayWeatherData();
+    getWeekWeatherData();
+  }
+});
+</script>
 
 <style lang="scss" scoped>
 .el-col {
@@ -141,7 +226,7 @@
           margin-bottom: 10px;
         }
       }
-      .city{
+      .city {
         width: 80%;
         height: 65px;
         margin-top: 60px;
@@ -151,8 +236,8 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        .name{
-          color:#fff;
+        .name {
+          color: #fff;
         }
       }
     }

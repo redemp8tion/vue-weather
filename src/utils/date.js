@@ -1,5 +1,5 @@
-function formatTime12h(timestamp) {
-    const date = new Date(timestamp);
+export function formatTime12h(timestamp) {
+    const date = new Date(timestamp * 1000);
     const hours = date.getHours();
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const period = hours >= 12 ? 'PM' : 'AM';
@@ -8,8 +8,8 @@ function formatTime12h(timestamp) {
     return `${hour12}:${minutes} ${period}`;
 }
 
-function formatDateTimeWithWeek(timestamp) {
-    const date = new Date(timestamp);
+export function formatDateTimeWithWeek(timestamp) {
+    const date = new Date(timestamp * 1000);
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');

@@ -5,24 +5,25 @@
         style="width: 260px"
         size="small"
         placeholder="Search for places"
+        v-model="queryCity"
         @focus="showRecentSearch = true"
         class="search-input"
       >
         <template #prepend>
-          <el-button :icon="Search" />
+          <el-button :icon="Search" @click="handleSearch"/>
         </template>
       </el-input>
     </div>
     <div class="recent-search" v-show="showRecentSearch">
       <div class="header">
         <div class="title">最近搜索</div>
-        <div class="clear">清空</div>
+        <div class="clear" @click="clearSearch">清空</div>
       </div>
       <div class="histories-wrap">
         <div class="histories">
-          <div class="history-item" v-for="item in 6">
-            <div class="history-text">Beijing</div>
-            <div class="close">
+          <div class="history-item" v-for="item in recentSearches" @click="handleClickSearch(item)">
+            <div class="history-text">{{item}}</div>
+            <div class="close" @click.stop="handleDelete(item)">
               <svg viewBox="0 0 1024 1024" width="14" height="14">
                 <path
                   d="M512 64.303538c-247.25636 0-447.696462 200.440102-447.696462 447.696462
@@ -46,10 +47,56 @@
 </template>
 
 <script setup>
+import {ElMessage} from 'element-plus'
 import { Search } from "@element-plus/icons-vue";
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted,defineEmits } from "vue";
 
 const showRecentSearch = ref(false);
+const recentSearches = ref(JSON.parse(localStorage.getItem("search")) || [])
+let queryCity = ref('')
+const emit = defineEmits(['clickSearch'])
+
+// 点击搜索按钮的回调
+const handleSearch = () => {
+  if(queryCity.value == ''){
+    ElMessage.warning('请输入城市名称！')
+    return
+  }
+  recentSearches.value = [...recentSearches.value,queryCity.value].slice(0,10)
+  localStorage.setItem('search',JSON.stringify(recentSearches.value))
+  emit('clickSearch',queryCity.value)
+  showRecentSearch.value = false
+  queryCity.value = ''
+}
+
+// 点击清空按钮的回调
+const clearSearch = () => {
+  recentSearches.value = []
+  localStorage.removeItem('search')
+}
+
+// 点击搜索历史城市的回调
+const handleClickSearch = (city) => {
+  let index = recentSearches.value.indexOf(city)
+  if(index !== -1) recentSearches.value.splice(index,1)
+  recentSearches.value = [...recentSearches.value,city].slice(0,10)
+  localStorage.setItem('search',JSON.stringify(recentSearches.value))
+  emit('clickSearch',city)
+  queryCity.value = ''
+}
+
+// 点击删除按钮的回调
+const handleDelete = (city) => {
+  let index = recentSearches.value.indexOf(city)
+  if(index !== -1){
+    recentSearches.value.splice(index,1)
+    localStorage.setItem('search',recentSearches.value)
+  }
+  if (recentSearches.value.length === 0) {
+    localStorage.removeItem('search')
+  }
+  
+}
 
 // 监听点击事件，如果点击的不是搜索框或最近搜索列表，则隐藏列表
 const handleClickOutside = (event) => {
