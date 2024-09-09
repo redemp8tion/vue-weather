@@ -93,6 +93,8 @@ const handleClickSearch = (city) => {;
 
 const handleClickUnitBtn = (btnIndex) => {
   unitIndex.value = btnIndex
+  recentSearches.value = JSON.parse(localStorage.getItem('search'))
+  recentCity = recentSearches.value[recentSearches.value.length - 1]
   if(btnIndex === 0){
     getTodayWeatherData(recentCity,'metric')
     getWeekWeatherData(recentCity,'metric')
@@ -106,7 +108,7 @@ const handleClickUnitBtn = (btnIndex) => {
 }
 
 const getTodayWeatherData = async (city, unit = "metric") => {
-  if (!recentSearches.value) {
+  if (!recentCity) {
     currentWeatherData.value = await fetchWeatherData("Guangdong", unit);
   } else {
     currentWeatherData.value = await fetchWeatherData(city, unit);
@@ -114,7 +116,7 @@ const getTodayWeatherData = async (city, unit = "metric") => {
 };
 
 const getWeekWeatherData = async (city, unit = "metric") => {
-  if (!recentSearches.value) {
+  if (!recentCity) {
     weeklyForecast.value = await fetchForecastWeatherData("Guangdong", unit);
   } else {
     weeklyForecast.value = await fetchForecastWeatherData(city, unit);
@@ -122,12 +124,12 @@ const getWeekWeatherData = async (city, unit = "metric") => {
 };
 
 onMounted(() => {
-  if (recentCity) {
-    getTodayWeatherData(recentCity);
-    getWeekWeatherData(recentCity);
-  } else {
+  if (!recentCity) {
     getTodayWeatherData();
     getWeekWeatherData();
+  } else {
+    getTodayWeatherData(recentCity);
+    getWeekWeatherData(recentCity);
   }
 });
 </script>
