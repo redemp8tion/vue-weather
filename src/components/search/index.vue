@@ -62,6 +62,10 @@ const handleSearch = () => {
     ElMessage.warning('请输入城市名称！')
     return
   }
+  if(recentSearches.value.indexOf(queryCity.value) !== -1){
+    let index = recentSearches.value.indexOf(queryCity.value)
+    recentSearches.value.splice(index,1)
+  }
   recentSearches.value = [...recentSearches.value,queryCity.value].slice(0,10)
   localStorage.setItem('search',JSON.stringify(recentSearches.value))
   emit('clickSearch',queryCity.value)

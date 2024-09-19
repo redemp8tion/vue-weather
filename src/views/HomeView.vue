@@ -78,7 +78,9 @@ let recentSearches = ref(JSON.parse(localStorage.getItem("search")) || []);
 let recentCity = recentSearches.value[recentSearches.value.length - 1];
 let unitIndex = ref(0)
 
-const handleClickSearch = (city) => {;
+const handleClickSearch = (city) => {
+  recentSearches.value = JSON.parse(localStorage.getItem("search"))
+  recentCity = recentSearches.value[recentSearches.value.length - 1]
   if(unitIndex.value === 0){
     getTodayWeatherData(city,'metric')
     getWeekWeatherData(city,'metric')
